@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
 )
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +24,9 @@ type Product struct {
 	ImgURL string `json:"imageUrl"`
 }
 
-var productList []Product
+var (
+	productList   []Product
+)
 
 func getProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -36,7 +39,41 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 
 	encoder := json.NewEncoder(w)
 	encoder.Encode(productList)
+}
 
+
+func addProduct(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(200)
+		return
+	}
+
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", 400)
+		return
+	}
+
+	var newProduct Product
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&newProduct)
+
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "please give a valid json", 400)
+		return
+	}
+
+	newProduct.ID = len(productList) + 1
+	productList = append(productList, newProduct)
+
+	w.WriteHeader(201)
+	encoder := json.NewEncoder(w)
+	encoder.Encode(newProduct)
 }
 
 
@@ -49,6 +86,8 @@ func main() {
 	mux.HandleFunc("/about", aboutHandler) // route
 
 	mux.HandleFunc("/products", getProducts)
+
+	mux.HandleFunc("/add-product", addProduct)
 
 	fmt.Println("Server running on : 8080")
 
@@ -84,7 +123,7 @@ func init() {
 		ImgURL: "https://e7.pngegg.com/pngimages/796/636/png-clipart-banana-banana-thumbnail.png",
 	}
 
-	prd4 := Product{
+/* 	prd4 := Product{
 		ID: 4,
 		Title: "Mango",
 		Description: "Mango is red color. I love mango",
@@ -106,14 +145,14 @@ func init() {
 		Description: "Grapes is green color. I love Grapes",
 		Price: 100,
 		ImgURL: "https://w7.pngwing.com/pngs/997/412/png-transparent-bunch-of-white-grapes-muscat-wine-juice-concord-grape-grape-natural-foods-food-wine-thumbnail.png",
-	}
+	} */
 
 	productList = append(productList, prd1)
 	productList = append(productList, prd2)
 	productList = append(productList, prd3)
-	productList = append(productList, prd4)
+/* 	productList = append(productList, prd4)
 	productList = append(productList, prd5)
-	productList = append(productList, prd6)
+	productList = append(productList, prd6) */
 }
 
 /* 
