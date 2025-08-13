@@ -31,6 +31,12 @@ var (
 func getProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-type", "application/json")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Ahmed")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(200)
+		return
+	}
 
 	if r.Method != "GET" {
 		http.Error(w, "Please give a GET request", 400)
